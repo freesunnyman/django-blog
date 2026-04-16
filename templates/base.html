@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Blog{% endblock %}</title>
+  <meta name="description" content="Django Blog">
+  <style>
+    :root {
+      --vp-c-brand: #5f67ee;
+      --vp-c-brand-light: #7c81f7;
+      --vp-c-brand-lighter: #9499ff;
+      --vp-c-bg: #ffffff;
+      --vp-c-bg-alt: #f6f6f7;
+      --vp-c-bg-soft: #f9f9f9;
+      --vp-c-text-1: #1e1e20;
+      --vp-c-text-2: #646468;
+      --vp-c-text-3: #8e8e93;
+      --vp-c-divider: #e5e5e6;
+      --vp-c-border: #e5e5e6;
+      --vp-nav-bg: rgba(255, 255, 255, 0.8);
+      --vp-code-bg: #282c34;
+      --vp-font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      --vp-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    html.dark {
+      --vp-c-brand: #8b94ff;
+      --vp-c-brand-light: #a5aaff;
+      --vp-c-brand-lighter: #bdc1ff;
+      --vp-c-bg: #1e1e20;
+      --vp-c-bg-alt: #252529;
+      --vp-c-bg-soft: #2a2a2d;
+      --vp-c-text-1: #f5f5f5;
+      --vp-c-text-2: #a5a5a5;
+      --vp-c-text-3: #757575;
+      --vp-c-divider: #3a3a3c;
+      --vp-c-border: #3a3a3c;
+      --vp-nav-bg: rgba(30, 30, 32, 0.8);
+      --vp-code-bg: #1e1e20;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      line-height: 1.6;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: var(--vp-font-family-base);
+      color: var(--vp-c-text-1);
+      background-color: var(--vp-c-bg);
+      min-height: 100vh;
+    }
+
+    a {
+      color: var(--vp-c-brand);
+      text-decoration: none;
+      transition: color 0.25s;
+    }
+
+    a:hover {
+      color: var(--vp-c-brand-light);
+    }
+
+    .VPNav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--vp-nav-bg);
+      backdrop-filter: saturate(180%) blur(5px);
+      border-bottom: 1px solid var(--vp-c-divider);
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--vp-c-text-2);
+      transition: background-color 0.25s, color 0.25s;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--vp-c-bg-soft);
+      color: var(--vp-c-text-1);
+    }
+
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    html.dark .theme-toggle .sun-icon {
+      display: inline;
+    }
+
+    html.dark .theme-toggle .moon-icon {
+      display: none;
+    }
+
+    html:not(.dark) .theme-toggle .sun-icon {
+      display: none;
+    }
+
+    html:not(.dark) .theme-toggle .moon-icon {
+      display: inline;
+    }
+
+    .VPNavBar {
+      height: 56px;
+      max-width: 1152px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .VPNavBarTitle .title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--vp-c-text-1);
+    }
+
+    .VPNavBarMenu {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .VPNavBarMenuLink {
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--vp-c-text-2);
+      transition: background-color 0.25s, color 0.25s;
+    }
+
+    .VPNavBarMenuLink:hover {
+      background-color: var(--vp-c-bg-soft);
+      color: var(--vp-c-text-1);
+    }
+
+    .VPContent {
+      padding-top: 24px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .VPHomeHero {
+      padding: 48px 0 32px;
+    }
+
+    .hero-title {
+      font-size: 40px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      background: linear-gradient(120deg, var(--vp-c-brand) 0%, var(--vp-c-brand-lighter) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-tagline {
+      font-size: 18px;
+      color: var(--vp-c-text-2);
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background-color: var(--vp-c-bg);
+      border: 1px solid var(--vp-c-border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      transition: border-color 0.25s, background-color 0.25s;
+    }
+
+    .card:hover {
+      border-color: var(--vp-c-brand-light);
+      background-color: var(--vp-c-bg-soft);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--vp-c-text-1);
+    }
+
+    .card-meta {
+      font-size: 14px;
+      color: var(--vp-c-text-3);
+    }
+
+    .muted {
+      color: var(--vp-c-text-2);
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .post-body {
+      line-height: 1.8;
+    }
+
+    .post-body h1 {
+      font-size: 32px;
+      margin: 32px 0 16px;
+      font-weight: 700;
+    }
+
+    .post-body h2 {
+      font-size: 24px;
+      margin: 28px 0 12px;
+      font-weight: 600;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--vp-c-divider);
+    }
+
+    .post-body h3 {
+      font-size: 20px;
+      margin: 24px 0 10px;
+      font-weight: 600;
+    }
+
+    .post-body p {
+      margin: 16px 0;
+    }
+
+    .post-body ul,
+    .post-body ol {
+      margin: 16px 0;
+      padding-left: 24px;
+    }
+
+    .post-body li {
+      margin: 8px 0;
+    }
+
+    .post-body pre {
+      background-color: var(--vp-code-bg);
+      color: #abb2bf;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+
+    .post-body code {
+      font-family: var(--vp-font-family-mono);
+      font-size: 14px;
+    }
+
+    .post-body p code,
+    .post-body li code {
+      background-color: var(--vp-c-bg-soft);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--vp-c-brand);
+    }
+
+    .post-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+
+    .post-body blockquote {
+      border-left: 4px solid var(--vp-c-brand);
+      padding-left: 16px;
+      margin: 16px 0;
+      color: var(--vp-c-text-2);
+    }
+
+    .post-body a {
+      text-decoration: underline;
+    }
+
+    .post-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+
+    .post-body th,
+    .post-body td {
+      border: 1px solid var(--vp-c-border);
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    .post-body th {
+      background-color: var(--vp-c-bg-soft);
+      font-weight: 600;
+    }
+
+    .VPContent.has-sidebar {
+      display: flex;
+      gap: 32px;
+      max-width: 1152px;
+      margin: 0 auto;
+      padding: 24px 24px 0;
+    }
+
+    .VPSidebar {
+      width: 240px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 80px;
+      height: fit-content;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+
+    .VPSidebar .sidebar-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--vp-c-text-2);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .VPSidebar .sidebar-link {
+      display: block;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: var(--vp-c-text-2);
+      font-size: 14px;
+      transition: background-color 0.25s, color 0.25s;
+      margin-bottom: 2px;
+    }
+
+    .VPSidebar .sidebar-link:hover {
+      background-color: var(--vp-c-bg-soft);
+      color: var(--vp-c-text-1);
+    }
+
+    .VPSidebar .sidebar-link.active {
+      background-color: var(--vp-c-bg-soft);
+      color: var(--vp-c-brand);
+      font-weight: 500;
+    }
+
+    .VPSidebar .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .VPMain {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .category-card {
+      background-color: var(--vp-c-bg);
+      border: 1px solid var(--vp-c-border);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.25s;
+      text-decoration: none;
+      display: block;
+    }
+
+    .category-card:hover {
+      border-color: var(--vp-c-brand-light);
+      background-color: var(--vp-c-bg-soft);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .category-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--vp-c-text-1);
+      margin-bottom: 8px;
+    }
+
+    .category-card-meta {
+      font-size: 14px;
+      color: var(--vp-c-text-3);
+    }
+
+    .VPFooter {
+      border-top: 1px solid var(--vp-c-divider);
+      margin-top: 48px;
+      padding: 24px 0;
+      text-align: center;
+    }
+
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--vp-c-text-3);
+    }
+
+    .icp-info a {
+      color: var(--vp-c-text-3);
+    }
+
+    .icp-info a:hover {
+      color: var(--vp-c-brand);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      color: var(--vp-c-text-2);
+      margin-bottom: 16px;
+    }
+
+    .back-link:hover {
+      color: var(--vp-c-brand);
+    }
+
+    .post-detail-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .post-detail-meta {
+      font-size: 14px;
+      color: var(--vp-c-text-3);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 28px;
+      }
+
+      .VPNavBar {
+        padding: 0 16px;
+      }
+
+      .container {
+        padding: 0 16px;
+      }
+
+      .post-detail-title {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="VPNav">
+    <nav class="VPNavBar">
+      <div class="VPNavBarTitle">
+        <a href="/" class="title">Django Blog</a>
+      </div>
+      <div class="VPNavBarMenu">
+        <a href="/" class="VPNavBarMenuLink">首页</a>
+        
+        {% if categories %}
+          <div class="VPFlyout" style="position: relative;">
+            <button class="VPNavBarMenuLink" style="border: none; background: none; cursor: pointer; font: inherit;" id="category-dropdown-btn">
+              分组 <span style="font-size: 10px;">▼</span>
+            </button>
+            <div id="category-dropdown" class="category-dropdown" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 4px; background: var(--vp-c-bg); border: 1px solid var(--vp-c-border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 180px; z-index: 1000;">
+              {% for category in categories %}
+                <a href="{% url 'blog:category_detail' slug=category.slug %}" style="display: block; padding: 8px 16px; color: var(--vp-c-text-1); text-decoration: none; transition: background-color 0.2s;">
+                  {{ category.name }}
+                  <span style="float: right; color: var(--vp-c-text-3); font-size: 12px;">({{ category.published_posts_count }})</span>
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        
+        <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+          <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="VPContent">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="VPFooter">
+    <div class="container">
+      <div class="footer-content">
+        <p>© {% now "Y" %} Django Blog. All rights reserved.</p>
+        <div style="display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;">
+          {% if ICP_INFO %}
+            <div class="icp-info">
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{{ ICP_INFO }}</a>
+            </div>
+          {% endif %}
+          {% if GOV_INFO %}
+            <div class="icp-info">
+              <a href="http://www.beian.gov.cn/" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 4px;">
+                <img src="https://www.beian.gov.cn/img/new/gongan.png" alt="公安备案" style="width: 16px; height: 16px;">
+                {{ GOV_INFO }}
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdownBtn = document.getElementById('category-dropdown-btn');
+      const dropdown = document.getElementById('category-dropdown');
+      
+      if (dropdownBtn && dropdown) {
+        dropdownBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        document.addEventListener('click', function() {
+          dropdown.style.display = 'none';
+        });
+        
+        dropdown.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
+      
+      const dropdownLinks = dropdown ? dropdown.querySelectorAll('a') : [];
+      dropdownLinks.forEach(link => {
+        link.addEventListener('mouseenter', function() {
+          this.style.backgroundColor = 'var(--vp-c-bg-soft)';
+        });
+        link.addEventListener('mouseleave', function() {
+          this.style.backgroundColor = 'transparent';
+        });
+      });
+      
+      const themeToggle = document.getElementById('theme-toggle');
+      if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+          const html = document.documentElement;
+          const isDark = html.classList.toggle('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+  <a href="/" class="back-link">← 返回列表</a>
+
+  <div class="card">
+    <h1 class="post-detail-title">{{ post.title }}</h1>
+    <div class="post-detail-meta">
+      {% if post.category %}
+        <span style="background-color: var(--vp-c-brand-lighter); color: white; padding: 4px 12px; border-radius: 12px; font-size: 13px;">{{ post.category.name }}</span>
+        <span>·</span>
+      {% endif %}
+      <span>{{ post.created_at|date:"Y-m-d H:i" }}</span>
+      <span>·</span>
+      <span>{{ post.get_source_type_display }}</span>
+      {% if post.source_file %}
+        <span>·</span>
+        <a href="{{ post.source_file.url }}">下载原文件</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card post-body">
+    {% if post.source_type == "markdown" %}
+      {{ post.content_html|safe }}
+    {% else %}
+      <pre>{{ post.content_text }}</pre>
+    {% endif %}
+  </div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}首页{% endblock %}
+
+{% block content %}
+  <div class="VPHomeHero">
+    <h1 class="hero-title">Django Blog</h1>
+    <p class="hero-tagline">探索技术，分享知识</p>
+  </div>
+
+  {% if categories %}
+    <section>
+      <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 16px; color: var(--vp-c-text-1);">文章分类</h2>
+      <div class="categories-grid">
+        {% for category in categories %}
+          <a href="{% url 'blog:category_detail' slug=category.slug %}" class="category-card">
+            <div class="category-card-title">{{ category.name }}</div>
+            <div class="category-card-meta">
+              {{ category.published_posts_count }} 篇文章
+              {% if category.description %}
+                <br><span style="margin-top: 4px; display: block;">{{ category.description }}</span>
+              {% endif %}
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <section style="margin-top: 48px;">
+    <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 16px; color: var(--vp-c-text-1);">最新文章</h2>
+    <div class="stack">
+      {% for post in posts %}
+        <a href="{% url 'blog:post_detail' slug=post.slug %}" style="text-decoration: none;">
+          <article class="card">
+            <h2 class="card-title">{{ post.title }}</h2>
+            <div class="card-meta">
+              {% if post.category %}
+                <span style="background-color: var(--vp-c-brand-lighter); color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">{{ post.category.name }}</span>
+                <span>·</span>
+              {% endif %}
+              <span>{{ post.created_at|date:"Y-m-d H:i" }}</span>
+              <span>·</span>
+              <span>{{ post.get_source_type_display }}</span>
+            </div>
+          </article>
+        </a>
+      {% empty %}
+        <div class="card">
+          <p class="muted">还没有文章。</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

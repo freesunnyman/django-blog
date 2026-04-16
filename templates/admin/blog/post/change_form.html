@@ -1,0 +1,91 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .folder-upload-info {
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border-left: 4px solid #79aec8;
+    }
+    .folder-upload-info h4 {
+        margin: 0 0 5px 0;
+        color: #447e9b;
+    }
+    .folder-upload-info p {
+        margin: 0;
+        font-size: 13px;
+        color: #666;
+    }
+    .selected-files {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #e8f5e9;
+        border-radius: 4px;
+        display: none;
+    }
+    .selected-files.show {
+        display: block;
+    }
+    .selected-files ul {
+        margin: 5px 0 0 0;
+        padding-left: 20px;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+    .selected-files li {
+        font-size: 12px;
+        color: #2e7d32;
+    }
+</style>
+{% endblock %}
+
+{% block field_sets %}
+{{ block.super }}
+{% endblock %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+<script>
+(function($) {
+    $(document).ready(function() {
+        var folderInput = $('#folder_upload');
+        if (folderInput.length) {
+            var infoDiv = $('<div class="folder-upload-info">' +
+                '<h4>文件夹上传说明</h4>' +
+                '<p>点击"选择整个图片文件夹上传"按钮，选择包含所有Markdown中引用图片的文件夹。系统会自动匹配文件名并替换图片路径。</p>' +
+                '</div>');
+            folderInput.closest('.form-row').before(infoDiv);
+            
+            var selectedDiv = $('<div class="selected-files" id="selected-files">' +
+                '<strong>已选择的文件：</strong>' +
+                '<ul id="file-list"></ul>' +
+                '</div>');
+            folderInput.closest('.form-row').after(selectedDiv);
+            
+            folderInput.on('change', function(e) {
+                var files = e.target.files;
+                var fileList = $('#file-list');
+                var selectedFiles = $('#selected-files');
+                
+                fileList.empty();
+                
+                if (files.length > 0) {
+                    for (var i = 0; i < files.length; i++) {
+                        var file = files[i];
+                        var fileName = file.name.split('/').pop() || file.name;
+                        fileList.append('<li>' + fileName + '</li>');
+                    }
+                    selectedFiles.addClass('show');
+                } else {
+                    selectedFiles.removeClass('show');
+                }
+            });
+        }
+    });
+})(django.jQuery);
+</script>
+{% endblock %}

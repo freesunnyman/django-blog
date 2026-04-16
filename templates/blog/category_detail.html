@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} - 文章分类{% endblock %}
+
+{% block content %}
+<div class="VPContent has-sidebar" style="padding-top: 32px;">
+  <aside class="VPSidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">全部分类</div>
+        {% for cat in categories %}
+        <a href="{% url 'blog:category_detail' slug=cat.slug %}" 
+           class="sidebar-link {% if cat.slug == category.slug %}active{% endif %}">
+          {{ cat.name }}
+          <span style="float: right; opacity: 0.6;">({{ cat.published_posts_count }})</span>
+        </a>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <main class="VPMain">
+    <a href="/" class="back-link">← 返回首页</a>
+    
+    <div class="VPHomeHero" style="padding: 24px 0 16px;">
+      <h1 class="hero-title">{{ category.name }}</h1>
+      {% if category.description %}
+        <p class="hero-tagline">{{ category.description }}</p>
+      {% endif %}
+      <p class="hero-tagline" style="font-size: 14px;">共 {{ posts|length }} 篇文章</p>
+    </div>
+
+    <div class="stack">
+      {% for post in posts %}
+        <a href="{% url 'blog:post_detail' slug=post.slug %}" style="text-decoration: none;">
+          <article class="card">
+            <h2 class="card-title">{{ post.title }}</h2>
+            <div class="card-meta">
+              <span>{{ post.created_at|date:"Y-m-d H:i" }}</span>
+              <span>·</span>
+              <span>{{ post.get_source_type_display }}</span>
+            </div>
+          </article>
+        </a>
+      {% empty %}
+        <div class="card">
+          <p class="muted">该分类下还没有文章。</p>
+        </div>
+      {% endfor %}
+    </div>
+  </main>
+</div>
+{% endblock %}
